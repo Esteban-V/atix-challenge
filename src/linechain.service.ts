@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { createWriteStream, existsSync, mkdirSync, WriteStream } from 'fs';
+import { Line } from './interfaces/Line';
 
 @Injectable()
 export class LineChainService {
@@ -10,24 +11,28 @@ export class LineChainService {
   private static fileDir = './output';
 
   private static fileWriteStream: WriteStream;
-  private static lastLine: Line;
+  private static lastLine;
 
   constructor() {
+    console.log('LineChainService constructing...');
     if (!LineChainService.initialized) {
-      LineChainService.initialized = true;
-
       if (!existsSync(LineChainService.fileDir)) {
         mkdirSync(LineChainService.fileDir);
+        console.log('Output directory created!');
       }
 
       LineChainService.fileWriteStream = createWriteStream(
         `${LineChainService.fileDir}/linechain.csv`,
       );
+
+      LineChainService.initialized = true;
+      console.log('LineChainService initialized!');
     }
   }
 
-  public static setLastLine({ prevHash, message, nonce }: Line) {
-    LineChainService.lastLine = { prevHash, message, nonce };
+  public static setLastLine({ prevHash, message, nonce }) {
+    LineChainService.lastLine = new Line({ prevHash, message, nonce });
+    console.log(`Last line changed to ${prevHash},${message},${nonce}`);
   }
 
   get lastLine(): Line {
@@ -35,14 +40,18 @@ export class LineChainService {
   }
 
   writeMessage(message: string): boolean {
-    const prevHash = this.lastLine
-      ? this.hash(this.lastLine)
+    const prevHash: string = this.lastLine
+      ? this.lastLine.hash
       : new Array(64).fill('0').join('');
 
-    const nonce = this.calculateNonce(prevHash, message);
+    const nonce: number = this.calculateNonce(prevHash, message);
+    console.log(`Got nonce ${nonce} for ${prevHash},${message}`);
+
+    if (!nonce) return false; //Unable to find a valid nonce
 
     LineChainService.setLastLine({ prevHash, message, nonce });
 
+    console.log(`Writing new line to file: ${prevHash},${message},${nonce}`);
     return LineChainService.fileWriteStream.write(
       `${prevHash},${message},${nonce}\n`,
     );
@@ -50,18 +59,14 @@ export class LineChainService {
 
   calculateNonce(prevHash: string, message: string) {
     for (let nonce = 0; nonce < this.maxNonce; nonce++) {
-      const hash = this.hash({ prevHash, message, nonce });
+      const hash = createHash('sha256')
+        .update(`${prevHash},${message},${nonce}`, 'utf8')
+        .digest('hex')
+        .toString();
 
       if (hash.match('^00.*')) {
         return nonce;
       }
     }
-  }
-
-  private hash({ prevHash, message, nonce }: Line): string {
-    return createHash('sha256')
-      .update(`${prevHash},${message},${nonce}`, 'utf8')
-      .digest('hex')
-      .toString();
   }
 }
