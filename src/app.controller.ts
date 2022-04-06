@@ -8,6 +8,10 @@ export class AppController {
 
   @Post()
   writeMessage(@Body() { message }: { message: string }) {
-    return this.lineChainService.writeMessage(message);
+    try {
+      return this.lineChainService.writeMessage(message);
+    } catch (err) {
+      return err.message;
+    }
   }
 }

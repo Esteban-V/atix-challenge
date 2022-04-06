@@ -41,7 +41,7 @@ export class LineChainService {
                 }),
             );
 
-            console.log(lineChain);
+            console.log(`Total lines in linechain: ${lineChain.length}`);
 
             if (this.isLineChainValid(lineChain)) {
               const lastLine = lines.slice(-1)[0];
@@ -68,7 +68,9 @@ export class LineChainService {
       LineChainService.fileWriteStream = createWriteStream(
         `${LineChainService.fileDir}/linechain.csv`,
         { flags: 'a' },
-      );
+      ).on('error', (err) => {
+        console.log(`Error while writing to file: ${err}`);
+      });
 
       console.log('LineChainService initialized!');
     }
@@ -93,14 +95,16 @@ export class LineChainService {
     const nonce: number = this.calculateNonce(prevHash, message);
     console.log(`Got nonce ${nonce} for ${prevHash},${message}`);
 
-    if (nonce == undefined) return false; //Unable to find a valid nonce
+    if (nonce == undefined) {
+      throw new Error('Could not calculate a valid nonce!');
+    }
 
     LineChainService.setLastLine({ prevHash, message, nonce });
 
     console.log(`Writing new line to file: ${prevHash},${message},${nonce}`);
-    return LineChainService.fileWriteStream.write(
-      `${prevHash},${message},${nonce}\n`,
-    );
+
+    LineChainService.fileWriteStream.write(`${prevHash},${message},${nonce}\n`);
+    return true;
   }
 
   isLineChainValid(lineChain: Line[]): boolean {
