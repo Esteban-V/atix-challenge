@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
-import {
-  createWriteStream,
-  existsSync,
-  mkdirSync,
-  readFile,
-  WriteStream,
-} from 'fs';
+import { createWriteStream, existsSync, mkdirSync, readFile, WriteStream } from 'fs';
 
 import { Line } from './classes/Line';
 
@@ -38,19 +32,34 @@ export class LineChainService {
             }
 
             const lines = data.trim().split('\n');
-            const lastLine = lines.slice(-1)[0];
+            const lineChain = lines.map(
+              (line) =>
+                new Line({
+                  prevHash: line.split(',')[0],
+                  message: line.split(',')[1],
+                  nonce: line.split(',')[2],
+                }),
+            );
 
-            if (!!lastLine) {
-              const [prevHash, message, nonce] = lastLine.split(',');
-              console.log(
-                `Loading last line from existing linechain: ${prevHash},${message},${nonce}`,
-              );
+            console.log(lineChain);
 
-              LineChainService.setLastLine({
-                prevHash,
-                message,
-                nonce,
-              });
+            if (this.isLineChainValid(lineChain)) {
+              const lastLine = lines.slice(-1)[0];
+
+              if (!!lastLine) {
+                const [prevHash, message, nonce] = lastLine.split(',');
+                console.log(
+                  `Loading last line from existing linechain: ${prevHash},${message},${nonce}`,
+                );
+
+                LineChainService.setLastLine({
+                  prevHash,
+                  message,
+                  nonce,
+                });
+              }
+            } else {
+              throw new Error('Linechain is not valid!');
             }
           },
         );
@@ -92,6 +101,29 @@ export class LineChainService {
     return LineChainService.fileWriteStream.write(
       `${prevHash},${message},${nonce}\n`,
     );
+  }
+
+  isLineChainValid(lineChain: Line[]): boolean {
+    if (lineChain.length === 0) return true;
+
+    let result = true;
+    let index = 0;
+
+    for (const line of lineChain.slice(1)) {
+      index++;
+      const prevLine = lineChain[index - 1];
+
+      console.log(line.prevHash, prevLine.hash, {
+        valid: line.prevHash == prevLine.hash,
+      });
+
+      if (line.prevHash != prevLine.hash) {
+        result = false;
+        break;
+      }
+    }
+
+    return result;
   }
 
   isValidHash(hash: string): boolean {
