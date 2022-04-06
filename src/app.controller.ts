@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
 
 import { LineChainService } from './linechain.service';
 
@@ -7,7 +7,10 @@ export class AppController {
   constructor(private readonly lineChainService: LineChainService) {}
 
   @Post()
-  writeMessage(@Body() { message }: { message: string }) {
+  writeMessage(@Body() { message }: { message: string }): boolean {
+    if (!message)
+      throw new HttpException('Message is required', HttpStatus.BAD_REQUEST);
+
     try {
       return this.lineChainService.writeMessage(message);
     } catch (err) {
