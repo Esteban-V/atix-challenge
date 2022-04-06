@@ -86,4 +86,4 @@ $ npm run test:cov
 ```
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://www.linkedin.com/in/esteban-viera/)
+- Author - [Esteban Viera](https://www.linkedin.com/in/esteban-viera/)
