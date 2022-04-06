@@ -7,7 +7,7 @@ export class AppController {
   constructor(private readonly lineChainService: LineChainService) {}
 
   @Post()
-  queueItem(@Body() { message }: { message: string }) {
+  writeMessage(@Body() { message }: { message: string }) {
     return this.lineChainService.writeMessage(message);
   }
 }
