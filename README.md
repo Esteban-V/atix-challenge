@@ -4,7 +4,7 @@
 
 It is required to program a web service to allow users to, when invoking an API method (POST), to write on a shared log file such that each entry (line) is linked to the previous one using its hash and a proof of work.
 
-####Expected line output CSV (file on server):
+#### Expected line output CSV (file on server):
 `prev_hash,message,nonce`
 
 **where:**
@@ -13,7 +13,7 @@ should use random for the first line.
 - *message*: message sent by the user.
 - *nonce*: a number that guarantees that `sha256(pre_hash + message + nonce) => RegEx('^00.*')`, i.e., starts with two zeroes.
 
-####Log file content example:
+#### Log file content example:
 `0000000000000000000000000000000000000000000000000000000000000000,Hola Mundo,5`
 `0038711c83bd05b1e369e27246df4ba815a6dda04116b1b2f9a8c21ba4e1de38,Chau Mundo,71`
 
