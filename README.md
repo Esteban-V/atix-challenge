@@ -1,4 +1,4 @@
-#[Atix Labs](https://www.atixlabs.com/) technical challenge - Backend Dev
+# [Atix Labs](https://www.atixlabs.com/) technical challenge - Backend Dev
 
 ## Goal
 
