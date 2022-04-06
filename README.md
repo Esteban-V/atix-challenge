@@ -1,30 +1,57 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+#[Atix Labs](https://www.atixlabs.com/) technical challenge - Backend Dev
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Goal
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+It is required to program a web service to allow users to, when invoking an API method (POST), to write on a shared log file such that each entry (line) is linked to the previous one using its hash and a proof of work.
 
-## Description
+####Expected line output CSV (file on server):
+`prev_hash,message,nonce`
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+**where:**
+- *prev_hash*: previous line hash (sha256) in hex format without any separators. You
+should use random for the first line.
+- *message*: message sent by the user.
+- *nonce*: a number that guarantees that `sha256(pre_hash + message + nonce) => RegEx('^00.*')`, i.e., starts with two zeroes.
+
+####Log file content example:
+`0000000000000000000000000000000000000000000000000000000000000000,Hola Mundo,5`
+`0038711c83bd05b1e369e27246df4ba815a6dda04116b1b2f9a8c21ba4e1de38,Chau Mundo,71`
+
+**Where effectively it holds that:**
+`sha256(pre_hash + message + nonce) => RegEx('^00.*')`
+
+**For example, you can find in the second line:**
+`0038711c83bd05b1e369e27246df4ba815a6dda04116b1b2f9a8c21ba4e1de38,Chau Mundo,71`
+
+If we want to verify the nonce is valid, we need to:
+`>HEX(SHA256(0038711c83bd05b1e369e27246df4ba815a6dda04116b1b2f9a8c21ba4e1de38,Chau Mundo,71))`
+`> 00232c7d3c2283695a4029eddc1b9e8c83914515832a04f57b402fc444aa11b5`
+
+## Success criteria
+- Code needs to be published on Github or Gitlab. We will be reviewing commit history.
+- It must contain a proper README file to help reviewers to understand how to launch or
+test the application. Also, don’t forget to keep your code clean and easy to read.
+- Users can perform requests (API calls) at the same time, the file log not necessarily
+must be sorted by requests income time.
+- The file:
+	- The link between lines must hold for all the lines in the file, i.e
+`hash(line(n-1)) == line(n)[0])`
+	- All the log lines hash must start with two zeroes.
+
+## Nice to have
+-  Integration tests.
+- Proper app logs to be able to troubleshoot.
+- A single request must not block the file. All the requests must compete with each other to write down in the log file.
+
+## Context & further notes
+**Proof of Work:** it is a cryptographic puzzle that, based on the dispersion (randomness) of hash functions, can be used to easily check a certain amount of work has been made as there is no other way to solve it besides doing bruteforce look up. It initially was created as a spam filter mechanism and nowadays is heavily used in blockchain applications.
+
+A consequence of hash-linking entries is that if anyone wants to edit one, all the
+hashes after it might be recalculated, i.e, all the work already made needs to be done
+again therefore it’s harder (in terms of computing power) to change old entries. This is
+a way to encourage immutability
+
+------------
 
 ## Installation
 
@@ -57,17 +84,6 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+- Author - [Kamil Myśliwiec](https://www.linkedin.com/in/esteban-viera/)
