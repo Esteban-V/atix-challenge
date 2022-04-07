@@ -17,6 +17,9 @@ export class AppController {
     if (!message)
       throw new HttpException('Message is required', HttpStatus.BAD_REQUEST);
 
+    //Prevent users from writing newlines in the message
+    message = JSON.stringify(message);
+
     try {
       return this.lineChainService.writeMessage(message);
     } catch (err) {
