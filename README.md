@@ -24,7 +24,9 @@ should use random for the first line.
 `0038711c83bd05b1e369e27246df4ba815a6dda04116b1b2f9a8c21ba4e1de38,Chau Mundo,71`
 
 If we want to verify the nonce is valid, we need to:
+
 `>HEX(SHA256(0038711c83bd05b1e369e27246df4ba815a6dda04116b1b2f9a8c21ba4e1de38,Chau Mundo,71))`
+
 `> 00232c7d3c2283695a4029eddc1b9e8c83914515832a04f57b402fc444aa11b5`
 
 ## Success criteria
@@ -80,9 +82,6 @@ $ npm run test
 
 # e2e tests
 $ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 ## Stay in touch
 
