@@ -1,3 +1,4 @@
+import { HttpException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppController } from './app.controller';
@@ -15,9 +16,19 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  // describe('root', () => {
-  //   it('should return "Hello World!"', () => {
-  //     expect(appController.getHello()).toBe('Hello World!');
-  //   });
-  // });
+  describe('writeMessage "Hola Mundo"', () => {
+    it('should return true', () => {
+      expect(appController.writeMessage({ message: 'Hola Mundo' })).toBe(true);
+    });
+  });
+
+  describe('writeMessage with empty message', () => {
+    it('should throw an exception', () => {
+      try {
+        appController.writeMessage({ message: undefined });
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+      }
+    });
+  });
 });

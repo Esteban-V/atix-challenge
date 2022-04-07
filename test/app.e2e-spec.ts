@@ -16,10 +16,22 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  describe('/ (POST)', () => {
+    it('should return 201', () => {
+      const message = { message: 'Hola Mundo' };
+      return request(app.getHttpServer())
+        .post('/')
+        .send(message)
+        .expect(({ text }) => {
+          expect(text).toBe('true');
+        })
+        .expect(201);
+    });
+  });
+
+  describe('/ (POST)', () => {
+    it('should return 400', () => {
+      return request(app.getHttpServer()).post('/').expect(400);
+    });
   });
 });
