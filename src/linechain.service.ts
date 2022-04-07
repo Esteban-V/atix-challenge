@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { createWriteStream, existsSync, mkdirSync, readFile, WriteStream } from 'fs';
+import { createWriteStream, existsSync, mkdirSync, readFile, readFileSync, WriteStream } from 'fs';
 
 import { Line } from './classes/Line';
 
@@ -21,43 +21,42 @@ export class LineChainService {
       mkdirSync(this.fileDir);
       console.log('Output directory created!');
     } else if (existsSync(`${this.fileDir}/linechain.csv`)) {
-      readFile(`${this.fileDir}/linechain.csv`, 'utf-8', (err, data) => {
-        if (err) {
-          console.log(`Error while reading file: ${err}`);
-          throw err;
-        }
-
-        const lines = data.trim().split('\n');
-        const lineChain = lines.map(
-          (line) =>
-            new Line({
-              prevHash: line.split(',')[0],
-              message: line.split(',')[1],
-              nonce: line.split(',')[2],
-            }),
-        );
-
-        console.log(`Total lines in linechain: ${lineChain.length}`);
-
-        if (this.isLineChainValid(lineChain)) {
-          const lastLine = lines.slice(-1)[0];
-
-          if (!!lastLine) {
-            const [prevHash, message, nonce] = lastLine.split(',');
-            console.log(
-              `Loading last line from existing linechain: ${prevHash},${message},${nonce}`,
-            );
-
-            this.setLastLine({
-              prevHash,
-              message,
-              nonce,
-            });
-          }
-        } else {
-          throw new Error('Linechain is not valid!');
-        }
+      const data = readFileSync(`${this.fileDir}/linechain.csv`, {
+        encoding: 'utf-8',
       });
+
+      if (!data) throw new Error('Linechain is not valid!');
+
+      const lines = data?.trim().split('\n');
+      const lineChain = lines.map(
+        (line) =>
+          new Line({
+            prevHash: line.split(',')[0],
+            message: line.split(',')[1],
+            nonce: line.split(',')[2],
+          }),
+      );
+
+      console.log(`Total lines in linechain: ${lineChain.length}`);
+
+      if (this.isLineChainValid(lineChain)) {
+        const lastLine = lines.slice(-1)[0];
+
+        if (!!lastLine) {
+          const [prevHash, message, nonce] = lastLine.split(',');
+          console.log(
+            `Loading last line from existing linechain: ${prevHash},${message},${nonce}`,
+          );
+
+          this.setLastLine({
+            prevHash,
+            message,
+            nonce,
+          });
+        }
+      } else {
+        throw new Error('Linechain is not valid!');
+      }
     }
 
     if (!this.fileWriteStream) {
@@ -100,6 +99,7 @@ export class LineChainService {
   }
 
   isLineChainValid(lineChain: Line[]): boolean {
+    console.log('Checking LineChain integrity');
     if (lineChain.length === 0) return true;
 
     let result = true;
