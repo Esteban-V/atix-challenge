@@ -75,8 +75,8 @@ export class LineChainService {
     console.log(`Last line changed to ${prevHash},${message},${nonce}`);
   }
 
-  writeMessage(message: string): boolean {
-    if (!this.fileWriteStream) return false; //Write stream not initialized
+  writeMessage(message: string): Line {
+    if (!this.fileWriteStream) return null; //Write stream not initialized
 
     const prevHash: string = this.lastLine
       ? this.lastLine.hash
@@ -89,13 +89,15 @@ export class LineChainService {
       throw new Error('Could not calculate a valid nonce!');
     }
 
-    this.setLastLine({ prevHash, message, nonce });
+    const newLine = new Line({ prevHash, message, nonce });
+
+    this.setLastLine(newLine);
 
     console.log(`Writing new line to file: ${prevHash},${message},${nonce}`);
 
     this.fileWriteStream.write(`${prevHash},${message},${nonce}\n`);
 
-    return true;
+    return newLine;
   }
 
   isLineChainValid(lineChain: Line[]): boolean {

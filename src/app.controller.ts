@@ -1,16 +1,10 @@
-import {
-  Body,
-  Controller,
-  HttpException,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
 
 import { LineChainService } from './linechain.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly lineChainService: LineChainService) {}
+  constructor(private readonly lineChainService: LineChainService) { }
 
   @Post()
   writeMessage(@Body() { message }: { message: string }) {
@@ -18,7 +12,7 @@ export class AppController {
       throw new HttpException('Message is required', HttpStatus.BAD_REQUEST);
 
     //Prevent users from writing newlines in the message
-    message = JSON.stringify(message);
+    message = message.replace(/(\r\n|\n|\r)/gm, '');
 
     try {
       return this.lineChainService.writeMessage(message);
