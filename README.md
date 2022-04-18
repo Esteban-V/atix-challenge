@@ -74,6 +74,25 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Writing on the LineChain
+
+### Request
+
+`POST /thing/`
+
+    curl -L -X POST 'localhost:3000'  -H 'Content-Type: application/json'  --data-raw '{"message":"Hola Mundo"}'
+
+### Response
+
+    HTTP/1.1 201 Created
+    Date: Mon, 18 Apr 2022 15:00:20 GMT
+    Status: 201 Created
+    Connection: keep-alive
+    Content-Type: application/json
+    Content-Length: 112
+
+    {"prevHash":"0000000000000000000000000000000000000000000000000000000000000000","message":"Hola Mundo","nonce":5}
+
 ## Test
 
 ```bash
